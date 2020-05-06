@@ -29,32 +29,19 @@ public class Main {
 
             if (Files.isDirectory(path)) {
                 System.out.println("============= Sub-Directories =============");
-                printFilesRecursively(path, 0);
+                printFilesRecursively(path, "");
             }
         }
     }
 
-    private static void printFilesRecursively(Path path, int level) throws IOException {
-        printIndentation(level);
-        printFileName(path.getFileName().toString());
+    private static void printFilesRecursively(Path path, String dash) throws IOException {
+        System.out.println(dash + path.getFileName().toString());
 
         if (Files.isDirectory(path)) {
             DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path);
             for (Path subPath : directoryStream) {
-                printFilesRecursively(subPath, level + 1);
+                printFilesRecursively(subPath, dash + "-");
             }
         }
-    }
-
-    private static void printIndentation(int indent) {
-        String dashes = "";
-        while (indent-- > 0) {
-            dashes += "-";
-        }
-        System.out.print(dashes);
-    }
-
-    private static void printFileName(String fileName) {
-        System.out.println(fileName);
     }
 }
