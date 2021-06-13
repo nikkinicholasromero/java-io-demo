@@ -8,6 +8,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,11 +23,8 @@ public class FileEncryption {
     private static final String encryptedGalleryFolder = "C:\\Users\\nikki\\Desktop\\Encrypted_Gallery\\";
 
     public static void main(String[] args) throws Exception {
-        String fromFile = galleryFolder + "Capture.PNG";
-        String toFile = encryptedGalleryFolder + "Capture.PNG";
-
-        CryptoUtils.encryptFile(fromFile, toFile, password);
-        CryptoUtils.decryptFile(fromFile, toFile, password);
+        CryptoUtils.encryptEntireDirectory(galleryFolder, encryptedGalleryFolder, password);
+        CryptoUtils.decryptEntireDirectory(galleryFolder, encryptedGalleryFolder, password);
     }
 }
 
@@ -36,7 +34,29 @@ class CryptoUtils {
     private static final int IV_LENGTH_BYTE = 12;
     private static final int SALT_LENGTH_BYTE = 16;
 
-    public static void encryptFile(String fromFile, String toFile, String password) throws Exception {
+    public static void encryptEntireDirectory(String galleryFolder, String encryptedGalleryFolder, String password) throws Exception {
+        Path galleryFolderPath = Paths.get(galleryFolder);
+
+        DirectoryStream<Path> directoryStream = Files.newDirectoryStream(galleryFolderPath);
+        for (Path galleryFolderFile : directoryStream) {
+            String fromFile = galleryFolder + "" + galleryFolderFile.getFileName();
+            String toFile = encryptedGalleryFolder + "" + galleryFolderFile.getFileName();
+            encryptFile(fromFile, toFile, password);
+        }
+    }
+
+    public static void decryptEntireDirectory(String galleryFolder, String encryptedGalleryFolder, String password) throws Exception {
+        Path galleryFolderPath = Paths.get(encryptedGalleryFolder);
+
+        DirectoryStream<Path> directoryStream = Files.newDirectoryStream(galleryFolderPath);
+        for (Path galleryFolderFile : directoryStream) {
+            String fromFile = galleryFolder + "" + galleryFolderFile.getFileName();
+            String toFile = encryptedGalleryFolder + "" + galleryFolderFile.getFileName();
+            decryptFile(fromFile, toFile, password);
+        }
+    }
+
+    private static void encryptFile(String fromFile, String toFile, String password) throws Exception {
         byte[] fileContent = Files.readAllBytes(Paths.get(fromFile));
         byte[] encryptedText = encrypt(fileContent, password);
         Path path = Paths.get(toFile);
@@ -48,7 +68,7 @@ class CryptoUtils {
         }
     }
 
-    public static void decryptFile(String fromFile, String toFile, String password) throws Exception {
+    private static void decryptFile(String fromFile, String toFile, String password) throws Exception {
         byte[] encryptedText = decryptFile(toFile, password);
         Path path = Paths.get(fromFile);
         Files.write(path, encryptedText);
