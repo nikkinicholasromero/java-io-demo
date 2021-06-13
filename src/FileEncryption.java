@@ -25,7 +25,7 @@ public class FileEncryption {
         String fromFile = galleryFolder + "Capture.PNG";
         String toFile = encryptedGalleryFolder + "Capture.PNG";
 
-        CryptoUtils.encrypFile(fromFile, toFile, password);
+        CryptoUtils.encryptFile(fromFile, toFile, password);
         CryptoUtils.decryptFile(fromFile, toFile, password);
     }
 }
@@ -36,8 +36,12 @@ class CryptoUtils {
     private static final int IV_LENGTH_BYTE = 12;
     private static final int SALT_LENGTH_BYTE = 16;
 
-    public static void encrypFile(String fromFile, String toFile, String password) throws Exception {
-        CryptoUtils.encryptFile(fromFile, toFile, password);
+    public static void encryptFile(String fromFile, String toFile, String password) throws Exception {
+        byte[] fileContent = Files.readAllBytes(Paths.get(fromFile));
+        byte[] encryptedText = encrypt(fileContent, password);
+        Path path = Paths.get(toFile);
+        Files.write(path, encryptedText);
+
         File file = new File(fromFile);
         if (file.delete()) {
             System.out.println("Original file deleted. ");
@@ -45,13 +49,18 @@ class CryptoUtils {
     }
 
     public static void decryptFile(String fromFile, String toFile, String password) throws Exception {
-        byte[] encryptedText = CryptoUtils.decryptFile(toFile, password);
+        byte[] encryptedText = decryptFile(toFile, password);
         Path path = Paths.get(fromFile);
         Files.write(path, encryptedText);
         File file = new File(toFile);
         if (file.delete()) {
             System.out.println("Encrypted file deleted. ");
         }
+    }
+
+    private static byte[] decryptFile(String fromEncryptedFile, String password) throws Exception {
+        byte[] fileContent = Files.readAllBytes(Paths.get(fromEncryptedFile));
+        return decrypt(fileContent, password);
     }
 
     private static byte[] encrypt(byte[] pText, String password) throws Exception {
@@ -86,18 +95,6 @@ class CryptoUtils {
         cipher.init(Cipher.DECRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
 
         return cipher.doFinal(cipherText);
-    }
-
-    private static void encryptFile(String fromFile, String toFile, String password) throws Exception {
-        byte[] fileContent = Files.readAllBytes(Paths.get(fromFile));
-        byte[] encryptedText = CryptoUtils.encrypt(fileContent, password);
-        Path path = Paths.get(toFile);
-        Files.write(path, encryptedText);
-    }
-
-    private static byte[] decryptFile(String fromEncryptedFile, String password) throws Exception {
-        byte[] fileContent = Files.readAllBytes(Paths.get(fromEncryptedFile));
-        return CryptoUtils.decrypt(fileContent, password);
     }
 
     private static byte[] getRandomNonce(int numBytes) {
