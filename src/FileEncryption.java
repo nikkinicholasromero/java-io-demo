@@ -34,24 +34,24 @@ class CryptoUtils {
     private static final int IV_LENGTH_BYTE = 12;
     private static final int SALT_LENGTH_BYTE = 16;
 
-    public static void encryptEntireDirectory(String galleryFolder, String encryptedGalleryFolder, String password) throws Exception {
-        Path galleryFolderPath = Paths.get(galleryFolder);
+    public static void encryptEntireDirectory(String originalFolder, String encryptedFolder, String password) throws Exception {
+        Path galleryFolderPath = Paths.get(originalFolder);
 
         DirectoryStream<Path> directoryStream = Files.newDirectoryStream(galleryFolderPath);
         for (Path galleryFolderFile : directoryStream) {
-            String fromFile = galleryFolder + "" + galleryFolderFile.getFileName();
-            String toFile = encryptedGalleryFolder + "" + galleryFolderFile.getFileName();
+            String fromFile = originalFolder + "" + galleryFolderFile.getFileName();
+            String toFile = encryptedFolder + "" + galleryFolderFile.getFileName();
             encryptFile(fromFile, toFile, password);
         }
     }
 
-    public static void decryptEntireDirectory(String galleryFolder, String encryptedGalleryFolder, String password) throws Exception {
-        Path galleryFolderPath = Paths.get(encryptedGalleryFolder);
+    public static void decryptEntireDirectory(String originalFolder, String encryptedFolder, String password) throws Exception {
+        Path galleryFolderPath = Paths.get(encryptedFolder);
 
         DirectoryStream<Path> directoryStream = Files.newDirectoryStream(galleryFolderPath);
         for (Path galleryFolderFile : directoryStream) {
-            String fromFile = galleryFolder + "" + galleryFolderFile.getFileName();
-            String toFile = encryptedGalleryFolder + "" + galleryFolderFile.getFileName();
+            String fromFile = originalFolder + "" + galleryFolderFile.getFileName();
+            String toFile = encryptedFolder + "" + galleryFolderFile.getFileName();
             decryptFile(fromFile, toFile, password);
         }
     }
